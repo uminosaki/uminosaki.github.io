@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-minimal.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"manual","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="这一部分主要记录了Java函数式接口的使用方法以及常用的函数式接口，函数式接口(Functional Interface)是Java 8对一类特殊类型的接口的称呼。 这类接口只定义了唯一的抽象方法的接口（除了隐含的Object对象的公共方法）。函数是接口是因为Lambda表达式必须要依赖于上下文存在，故此类接口是Lambda表达式（包括方法引用）的一种实现方式。 文章结构分为「函数式接口的概述、函">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Java基础—函数式接口">
+<meta property="og:url" content="http://example.com/2021/09/27/Java%E5%9F%BA%E7%A1%80%E2%80%94%E5%87%BD%E6%95%B0%E5%BC%8F%E6%8E%A5%E5%8F%A3/index.html">
+<meta property="og:site_name" content="海の咲的杂货铺">
+<meta property="og:description" content="这一部分主要记录了Java函数式接口的使用方法以及常用的函数式接口，函数式接口(Functional Interface)是Java 8对一类特殊类型的接口的称呼。 这类接口只定义了唯一的抽象方法的接口（除了隐含的Object对象的公共方法）。函数是接口是因为Lambda表达式必须要依赖于上下文存在，故此类接口是Lambda表达式（包括方法引用）的一种实现方式。 文章结构分为「函数式接口的概述、函">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-09-27T12:01:00.000Z">
+<meta property="article:modified_time" content="2021-10-02T03:15:31.359Z">
+<meta property="article:author" content="海の咲">
+<meta property="article:tag" content="Lambda表达式">
+<meta property="article:tag" content="接口">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://example.com/2021/09/27/Java%E5%9F%BA%E7%A1%80%E2%80%94%E5%87%BD%E6%95%B0%E5%BC%8F%E6%8E%A5%E5%8F%A3/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Java基础—函数式接口 | 海の咲的杂货铺</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">海の咲的杂货铺</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-resources">
+
+    <a href="/resources/" rel="section"><i class="fa fa-download fa-fw"></i>资源库</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/09/27/Java%E5%9F%BA%E7%A1%80%E2%80%94%E5%87%BD%E6%95%B0%E5%BC%8F%E6%8E%A5%E5%8F%A3/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="海の咲">
+      <meta itemprop="description" content="商品绝赞追加中">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="海の咲的杂货铺">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Java基础—函数式接口
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-09-27 20:01:00" itemprop="dateCreated datePublished" datetime="2021-09-27T20:01:00+08:00">2021-09-27</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2021-10-02 11:15:31" itemprop="dateModified" datetime="2021-10-02T11:15:31+08:00">2021-10-02</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Java%E5%9F%BA%E7%A1%80/" itemprop="url" rel="index"><span itemprop="name">Java基础</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2021/09/27/Java%E5%9F%BA%E7%A1%80%E2%80%94%E5%87%BD%E6%95%B0%E5%BC%8F%E6%8E%A5%E5%8F%A3/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2021/09/27/Java%E5%9F%BA%E7%A1%80%E2%80%94%E5%87%BD%E6%95%B0%E5%BC%8F%E6%8E%A5%E5%8F%A3/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>这一部分主要记录了Java函数式接口的使用方法以及常用的函数式接口，函数式接口(Functional Interface)是Java 8对一类特殊类型的接口的称呼。 这类接口只定义了唯一的抽象方法的接口（除了隐含的Object对象的公共方法）。函数是接口是因为Lambda表达式必须要依赖于上下文存在，故此类接口是Lambda表达式（包括方法引用）的一种实现方式。</p>
+<p>文章结构分为「函数式接口的概述、函数是接口的使用方式、常用的函数式接口」三个部分。</p>
+<span id="more"></span>
+
+<h2 id="函数式接口的概述"><a href="#函数式接口的概述" class="headerlink" title="函数式接口的概述"></a>函数式接口的概述</h2><p><strong>概念</strong></p>
+<ul>
+<li>有且仅有一个抽象方法的接口，即可以使用Lambda表达式的接口</li>
+<li>函数式接口可以用作【参数传递】&amp;【局部变量】</li>
+</ul>
+<p><strong>函数式接口标记</strong><br><code>@FunctionalInterface</code>(建议加上)</p>
+<p>放在接口定义的上方：如果接口是函数式接口，编译通过；如果不是，编译失败</p>
+<h2 id="函数式接口的使用方式"><a href="#函数式接口的使用方式" class="headerlink" title="函数式接口的使用方式"></a>函数式接口的使用方式</h2><h3 id="函数式接口作为方法的参数-以Runnable-为例"><a href="#函数式接口作为方法的参数-以Runnable-为例" class="headerlink" title="函数式接口作为方法的参数(以Runnable()为例)"></a>函数式接口作为方法的参数(以Runnable()为例)</h3><p><strong>要求</strong><br>定义一个类(RunnableDemo)，在类中提供两个方法：</p>
+<p>一个方法是：startThread(Runnable r) 方法参数Runnable是一个函数式接口</p>
+<p>一个方法是：主方法，在主方法中调用startThread方法</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        <span class="comment">//在主方法中调用startThread方法</span></span><br><span class="line">        <span class="comment">//匿名内部类的方式</span></span><br><span class="line">        startThread(<span class="keyword">new</span> Runnable() &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">                System.out.println(Thread.currentThread().getName() + <span class="string">&quot;线程 - 匿名内部类的方式&quot;</span>);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line">        <span class="comment">//Lambda表达式的方式</span></span><br><span class="line">        startThread(() -&gt; System.out.println(Thread.currentThread().getName() + <span class="string">&quot;线程 - Lambda表达式的方式&quot;</span>));</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">startThread</span><span class="params">(Runnable r)</span></span>&#123;</span><br><span class="line"><span class="comment">//        Thread t = new Thread(r);</span></span><br><span class="line"><span class="comment">//        t.start();</span></span><br><span class="line">        <span class="keyword">new</span> Thread(r).start();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="函数式接口作为方法的返回值-以Comparator-为例"><a href="#函数式接口作为方法的返回值-以Comparator-为例" class="headerlink" title="函数式接口作为方法的返回值(以Comparator() 为例)"></a>函数式接口作为方法的返回值(以Comparator() 为例)</h3><p><strong>要求</strong></p>
+<p>定义一个类(ComparatorDemo)，在类中提供两个方法：</p>
+<p>一个方法是：Comparator getComparator() 方法返回值Comparator是一个函数式接口</p>
+<p>一个方法是主方法，在主方法中调用getComparator方法</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ComparatorDemo</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        <span class="comment">//构造使用场景</span></span><br><span class="line">        ArrayList&lt;String&gt; array = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">        array.add(<span class="string">&quot;abcdefghijklmn&quot;</span>);</span><br><span class="line">        array.add(<span class="string">&quot;199&quot;</span>);</span><br><span class="line">        array.add(<span class="string">&quot;1234567890&quot;</span>);</span><br><span class="line"></span><br><span class="line">        System.out.println(<span class="string">&quot;排序前&quot;</span> + array);</span><br><span class="line"></span><br><span class="line">        Collections.sort(array, getComparator());</span><br><span class="line"></span><br><span class="line">        System.out.println(<span class="string">&quot;排序后&quot;</span> + array);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">static</span> Comparator&lt;String&gt; <span class="title">getComparator</span><span class="params">()</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">		<span class="comment">//匿名内部类实现</span></span><br><span class="line">		<span class="keyword">return</span> <span class="keyword">new</span> Comparator&lt;String&gt;() &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">compare</span><span class="params">(String s1, String s2)</span> </span>&#123;</span><br><span class="line">                <span class="keyword">return</span> s1.length() - s2.length();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;;</span><br><span class="line"></span><br><span class="line">        <span class="comment">//Lambda表达式方式</span></span><br><span class="line">        <span class="keyword">return</span> (s1, s2) -&gt; s1.length() - s2.length(); <span class="comment">//函数式接口作为方法的返回值，使用Lambda接口</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="常用的函数式接口"><a href="#常用的函数式接口" class="headerlink" title="常用的函数式接口"></a>常用的函数式接口</h2><h3 id="生产型接口——Supplier"><a href="#生产型接口——Supplier" class="headerlink" title="生产型接口——Supplier"></a>生产型接口——Supplier</h3><p><strong>作用</strong></p>
+<p>如果我们指定了接口的泛型是什么类型，那么接口中的get方法就会生产什么类型的数据供我们使用。</p>
+<p><strong>方法</strong></p>
+<table>
+<thead>
+<tr>
+<th align="center">方法名</th>
+<th align="center">说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">T get()</td>
+<td align="center">按照某种实现逻辑(由Lambda表达式实现)返回一个数据</td>
+</tr>
+</tbody></table>
+<p><strong>示例</strong></p>
+<p><strong>案例需求</strong><br>定义一个类(SupplierTest)，在类中提供两个方法</p>
+<p>​    一个方法是：int getMax(Supplier sup) 用于返回一个int数组中的最大值</p>
+<p>​    一个方法是主方法，在主方法中调用getMax方法</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">SupplierTest</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">int</span>[] arr = &#123;<span class="number">1</span>,<span class="number">6</span>,<span class="number">3</span>,<span class="number">4</span>&#125;;</span><br><span class="line">        <span class="keyword">int</span> maxValue = getMax(() -&gt; &#123;</span><br><span class="line">            <span class="keyword">int</span> max = arr[<span class="number">0</span>];</span><br><span class="line">            <span class="keyword">for</span>(<span class="keyword">int</span> i = <span class="number">1</span>; i &lt; arr.length; i++)&#123;</span><br><span class="line">                max = Math.max(max, arr[i]);</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">return</span> max;</span><br><span class="line">        &#125;);</span><br><span class="line"></span><br><span class="line">        System.out.println(maxValue);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//使用 SupPlier&lt;T&gt; 的 get() 方法返回一个最大值，具体实现由主类中的Lambda实现</span></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">int</span> <span class="title">getMax</span><span class="params">(Supplier&lt;Integer&gt; sup)</span></span>&#123;</span><br><span class="line">        <span class="keyword">return</span> sup.get();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="消费型接口——Consumer"><a href="#消费型接口——Consumer" class="headerlink" title="消费型接口——Consumer"></a>消费型接口——Consumer</h3><p><strong>作用</strong></p>
+<p>对传入参数执行或依次执行操作，它消费的数据的数据类型由泛型指定</p>
+<p><strong>方法</strong></p>
+<table>
+<thead>
+<tr>
+<th align="center">方法名</th>
+<th align="center">说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">void accept(T t)</td>
+<td align="center">对给定的参数执行此操作</td>
+</tr>
+<tr>
+<td align="center">default Consumer andThen(Consumer after)</td>
+<td align="center">返回一个组合的Consumer，依次执行此操作，然后执行after操作<br />采用链式编程</td>
+</tr>
+</tbody></table>
+<p><strong>示例</strong></p>
+<p><strong>案例需求</strong><br>String[] strArray = {“林青霞,30”, “张曼玉,35”, “王祖贤,33”};</p>
+<p>字符串数组中有多条信息，请按照格式：“姓名：XX,年龄：XX”的格式将信息打印出来</p>
+<p><strong>要求</strong><br>把打印姓名的动作作为第一个Consumer接口的Lambda实例</p>
+<p>把打印年龄的动作作为第二个Consumer接口的Lambda实例</p>
+<p>将两个Consumer接口按照顺序组合到一起使用</p>
+<p><strong>代码实现</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ConsumerTest</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        String[] strArray = &#123;<span class="string">&quot;小林,30&quot;</span>, <span class="string">&quot;小张,35&quot;</span>, <span class="string">&quot;小王,33&quot;</span>&#125;;</span><br><span class="line">        </span><br><span class="line">        <span class="comment">//con1 与 con2 的操作在此处定义</span></span><br><span class="line">        printNameAge(strArray, s -&gt; System.out.print(s.split(<span class="string">&quot;,&quot;</span>)[<span class="number">0</span>]), (s -&gt; System.out.println(s.split(<span class="string">&quot;,&quot;</span>)[<span class="number">1</span>])));</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">printNameAge</span><span class="params">(String[] strArray, Consumer&lt;String&gt; con1, Consumer&lt;String&gt; con2)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">for</span>(String s : strArray)&#123;</span><br><span class="line">            </span><br><span class="line">            <span class="comment">//对传入参数 s ，先进行 con1 的操作；再进行 con2 的操作。</span></span><br><span class="line">            <span class="comment">//con1 与 con2 的操作由主类Lambda表达式定义</span></span><br><span class="line">            con1.andThen(con2).accept(s);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="判断用接口——Predicate"><a href="#判断用接口——Predicate" class="headerlink" title="判断用接口——Predicate"></a>判断用接口——Predicate</h3><p><strong>作用</strong></p>
+<p>Predicate接口通常用于判断参数是否满足指定的条件</p>
+<p><strong>方法</strong></p>
+<table>
+<thead>
+<tr>
+<th align="center">方法名</th>
+<th align="center">说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">boolean test(T t)</td>
+<td align="center">对给定的参数进行判断(判断逻辑由Lambda表达式实现)，返回一个布尔值</td>
+</tr>
+<tr>
+<td align="center">default Predicate negate()</td>
+<td align="center">返回一个逻辑的否定，对应逻辑非</td>
+</tr>
+<tr>
+<td align="center">default Predicate and(Predicate other)</td>
+<td align="center">返回一个组合判断，对应短路与</td>
+</tr>
+<tr>
+<td align="center">default Predicate or(Predicate other)</td>
+<td align="center">返回一个组合判断，对应短路或</td>
+</tr>
+</tbody></table>
+<p><strong>示例</strong></p>
+<ul>
+<li><p>练习描述</p>
+<ul>
+<li><p>String[] strArray = {“林青霞,30”, “柳岩,34”, “张曼玉,35”, “貂蝉,31”, “王祖贤,33”};</p>
+</li>
+<li><p>字符串数组中有多条信息，请通过Predicate接口的拼装将符合要求的字符串筛选到集合ArrayList中，并遍历ArrayList集合</p>
+</li>
+<li><p>同时满足如下要求：</p>
+<p>姓名长度大于2；年龄大于33</p>
+</li>
+</ul>
+</li>
+<li><p>分析</p>
+<ul>
+<li>有两个判断条件,所以需要使用两个Predicate接口,对条件进行判断</li>
+<li>必须同时满足两个条件,所以可以使用and方法连接两个判断条件</li>
+</ul>
+</li>
+<li><p>代码实现</p>
+</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">PredicateTest</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        String[] strArray = &#123;<span class="string">&quot;林青霞,30&quot;</span>, <span class="string">&quot;柳岩,34&quot;</span>, <span class="string">&quot;张曼玉,35&quot;</span>, <span class="string">&quot;貂蝉,31&quot;</span>, <span class="string">&quot;王祖贤,33&quot;</span>&#125;;</span><br><span class="line">        ArrayList&lt;String&gt; array = myFilter(strArray, s -&gt; s.split(<span class="string">&quot;,&quot;</span>)[<span class="number">0</span>].length() &gt; <span class="number">2</span>, s -&gt; Integer.parseInt(s.split(<span class="string">&quot;,&quot;</span>)[<span class="number">1</span>]) &gt; <span class="number">33</span>);</span><br><span class="line">        System.out.println(array);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    </span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">static</span> ArrayList&lt;String&gt; <span class="title">myFilter</span><span class="params">(String[] strArray, Predicate&lt;String&gt; pre1, Predicate&lt;String&gt; pre2)</span></span>&#123;</span><br><span class="line">        ArrayList&lt;String&gt; array = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span>(String s : strArray)&#123;</span><br><span class="line">            <span class="comment">//这里是对 s 判断一下 pre2 和 pre1 的真假，然后进行与操作</span></span><br><span class="line">            <span class="comment">//至于 pre1 和 pre2 的判断过程，由主流的Lambda表达式给出</span></span><br><span class="line">            <span class="keyword">if</span>(pre1.and(pre2).test(s))&#123;</span><br><span class="line">                array.add(s);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> array;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="数据处理返回用接口——Function"><a href="#数据处理返回用接口——Function" class="headerlink" title="数据处理返回用接口——Function"></a>数据处理返回用接口——Function</h3><p><strong>作用</strong></p>
+<p>Function&lt;T,R&gt;接口通常用于对参数进行处理，转换(处理逻辑由Lambda表达式实现)，然后返回一个新的值。转换前的数据类型是 T ，转换后的数据类型是 R 。</p>
+<p><strong>方法</strong></p>
+<table>
+<thead>
+<tr>
+<th>方法名</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>R apply(T t)</td>
+<td>将此函数应用于给定的参数</td>
+</tr>
+<tr>
+<td>default Function andThen(Function after)</td>
+<td>返回一个组合函数，首先将该函数应用于输入，然后将after函数应用于结果</td>
+</tr>
+</tbody></table>
+<p><strong>示例</strong></p>
+<ul>
+<li>练习描述<ul>
+<li>String s = “林青霞,30”;<br>请按照我指定的要求进行操作：</li>
+<li>1:将字符串截取得到数字年龄部分<br>2:将上一步的年龄字符串转换成为int类型的数据<br>3:将上一步的int数据加70，得到一个int结果，在控制台输出</li>
+<li>请通过Function接口来实现函数拼接</li>
+</ul>
+</li>
+<li>代码实现</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">FunctionTest</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        String s = <span class="string">&quot;林青霞,30&quot;</span>;</span><br><span class="line">        Integer converted = convert(s, s1 -&gt; Integer.parseInt(s.split(<span class="string">&quot;,&quot;</span>)[<span class="number">1</span>]), s2 -&gt; s2 + <span class="number">70</span>);</span><br><span class="line">        System.out.println(converted);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">static</span> Integer <span class="title">convert</span><span class="params">(String s, Function&lt;String, Integer&gt; fun1, Function&lt;Integer, Integer&gt; fun2)</span></span>&#123;</span><br><span class="line">        <span class="comment">//返回处理结果，对 s 先进行 fun1 的运算，再进行 fun2 的运算</span></span><br><span class="line">        <span class="keyword">return</span> fun1.andThen(fun2).apply(s);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Lambda%E8%A1%A8%E8%BE%BE%E5%BC%8F/" rel="tag"># Lambda表达式</a>
+              <a href="/tags/%E6%8E%A5%E5%8F%A3/" rel="tag"># 接口</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/09/27/Java%E5%9F%BA%E7%A1%80%E2%80%94%E6%8E%A5%E5%8F%A3%E7%9A%84%E7%BB%84%E6%88%90%E6%9B%B4%E6%96%B0/" rel="prev" title="Java基础—接口的组成更新">
+      <i class="fa fa-chevron-left"></i> Java基础—接口的组成更新
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2021/09/27/Java%E5%9F%BA%E7%A1%80%E2%80%94Stream%E6%B5%81/" rel="next" title="Java基础—Stream流">
+      Java基础—Stream流 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="valine-comments"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%87%BD%E6%95%B0%E5%BC%8F%E6%8E%A5%E5%8F%A3%E7%9A%84%E6%A6%82%E8%BF%B0"><span class="nav-number">1.</span> <span class="nav-text">函数式接口的概述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%87%BD%E6%95%B0%E5%BC%8F%E6%8E%A5%E5%8F%A3%E7%9A%84%E4%BD%BF%E7%94%A8%E6%96%B9%E5%BC%8F"><span class="nav-number">2.</span> <span class="nav-text">函数式接口的使用方式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%87%BD%E6%95%B0%E5%BC%8F%E6%8E%A5%E5%8F%A3%E4%BD%9C%E4%B8%BA%E6%96%B9%E6%B3%95%E7%9A%84%E5%8F%82%E6%95%B0-%E4%BB%A5Runnable-%E4%B8%BA%E4%BE%8B"><span class="nav-number">2.1.</span> <span class="nav-text">函数式接口作为方法的参数(以Runnable()为例)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%87%BD%E6%95%B0%E5%BC%8F%E6%8E%A5%E5%8F%A3%E4%BD%9C%E4%B8%BA%E6%96%B9%E6%B3%95%E7%9A%84%E8%BF%94%E5%9B%9E%E5%80%BC-%E4%BB%A5Comparator-%E4%B8%BA%E4%BE%8B"><span class="nav-number">2.2.</span> <span class="nav-text">函数式接口作为方法的返回值(以Comparator() 为例)</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B8%B8%E7%94%A8%E7%9A%84%E5%87%BD%E6%95%B0%E5%BC%8F%E6%8E%A5%E5%8F%A3"><span class="nav-number">3.</span> <span class="nav-text">常用的函数式接口</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%94%9F%E4%BA%A7%E5%9E%8B%E6%8E%A5%E5%8F%A3%E2%80%94%E2%80%94Supplier"><span class="nav-number">3.1.</span> <span class="nav-text">生产型接口——Supplier</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B6%88%E8%B4%B9%E5%9E%8B%E6%8E%A5%E5%8F%A3%E2%80%94%E2%80%94Consumer"><span class="nav-number">3.2.</span> <span class="nav-text">消费型接口——Consumer</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%A4%E6%96%AD%E7%94%A8%E6%8E%A5%E5%8F%A3%E2%80%94%E2%80%94Predicate"><span class="nav-number">3.3.</span> <span class="nav-text">判断用接口——Predicate</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E5%A4%84%E7%90%86%E8%BF%94%E5%9B%9E%E7%94%A8%E6%8E%A5%E5%8F%A3%E2%80%94%E2%80%94Function"><span class="nav-number">3.4.</span> <span class="nav-text">数据处理返回用接口——Function</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="海の咲"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">海の咲</p>
+  <div class="site-description" itemprop="description">商品绝赞追加中</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">12</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/uminosaki" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;uminosaki" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:railmisachu@outlook.com" title="E-Mail → mailto:railmisachu@outlook.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">海の咲</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+
+<script>
+NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
+  NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+    var GUEST = ['nick', 'mail', 'link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item => {
+      return GUEST.includes(item);
+    });
+    new Valine({
+      el         : '#valine-comments',
+      verify     : true,
+      notify     : true,
+      appId      : 'ys4eYd27IL7M3JNcQiQIQghD-MdYXbMMI',
+      appKey     : 'BiF7Wym6Ved3aDPqJcfYKFPY',
+      placeholder: "请输入评论",
+      avatar     : 'mm',
+      meta       : guest,
+      pageSize   : '10' || 10,
+      visitor    : false,
+      lang       : 'zh-cn' || 'zh-cn',
+      path       : location.pathname,
+      recordIP   : false,
+      serverURLs : ''
+    });
+  }, window.Valine);
+});
+</script>
+
+</body>
+</html>

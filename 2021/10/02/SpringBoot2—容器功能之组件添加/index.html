@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-minimal.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"manual","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="这里讲述了SpringBoot的容器功能的组件添加，包括「配置类、Full模式与Lite模式、条件装配与测试类」">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SpringBoot2—容器功能之组件添加">
+<meta property="og:url" content="http://example.com/2021/10/02/SpringBoot2%E2%80%94%E5%AE%B9%E5%99%A8%E5%8A%9F%E8%83%BD%E4%B9%8B%E7%BB%84%E4%BB%B6%E6%B7%BB%E5%8A%A0/index.html">
+<meta property="og:site_name" content="海の咲的杂货铺">
+<meta property="og:description" content="这里讲述了SpringBoot的容器功能的组件添加，包括「配置类、Full模式与Lite模式、条件装配与测试类」">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/2021/10/02/SpringBoot2%E2%80%94%E5%AE%B9%E5%99%A8%E5%8A%9F%E8%83%BD%E4%B9%8B%E7%BB%84%E4%BB%B6%E6%B7%BB%E5%8A%A0/01.png">
+<meta property="article:published_time" content="2021-10-02T03:40:00.000Z">
+<meta property="article:modified_time" content="2021-10-02T09:43:20.257Z">
+<meta property="article:author" content="海の咲">
+<meta property="article:tag" content="配置类">
+<meta property="article:tag" content="条件装配">
+<meta property="article:tag" content="Bean组件">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/2021/10/02/SpringBoot2%E2%80%94%E5%AE%B9%E5%99%A8%E5%8A%9F%E8%83%BD%E4%B9%8B%E7%BB%84%E4%BB%B6%E6%B7%BB%E5%8A%A0/01.png">
+
+<link rel="canonical" href="http://example.com/2021/10/02/SpringBoot2%E2%80%94%E5%AE%B9%E5%99%A8%E5%8A%9F%E8%83%BD%E4%B9%8B%E7%BB%84%E4%BB%B6%E6%B7%BB%E5%8A%A0/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>SpringBoot2—容器功能之组件添加 | 海の咲的杂货铺</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">海の咲的杂货铺</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-resources">
+
+    <a href="/resources/" rel="section"><i class="fa fa-download fa-fw"></i>资源库</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/10/02/SpringBoot2%E2%80%94%E5%AE%B9%E5%99%A8%E5%8A%9F%E8%83%BD%E4%B9%8B%E7%BB%84%E4%BB%B6%E6%B7%BB%E5%8A%A0/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="海の咲">
+      <meta itemprop="description" content="商品绝赞追加中">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="海の咲的杂货铺">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          SpringBoot2—容器功能之组件添加
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2021-10-02 11:40:00 / 修改时间：17:43:20" itemprop="dateCreated datePublished" datetime="2021-10-02T11:40:00+08:00">2021-10-02</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/SpringBoot/" itemprop="url" rel="index"><span itemprop="name">SpringBoot</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2021/10/02/SpringBoot2%E2%80%94%E5%AE%B9%E5%99%A8%E5%8A%9F%E8%83%BD%E4%B9%8B%E7%BB%84%E4%BB%B6%E6%B7%BB%E5%8A%A0/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2021/10/02/SpringBoot2%E2%80%94%E5%AE%B9%E5%99%A8%E5%8A%9F%E8%83%BD%E4%B9%8B%E7%BB%84%E4%BB%B6%E6%B7%BB%E5%8A%A0/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>这里讲述了SpringBoot的容器功能的组件添加，包括「配置类、Full模式与Lite模式、条件装配与测试类」</p>
+<span id="more"></span>
+
+<h2 id="配置类概述-Configuration"><a href="#配置类概述-Configuration" class="headerlink" title="配置类概述(@Configuration)"></a>配置类概述(@Configuration)</h2><p><code>@Configuration</code>写在类上，用于标记这是“配置类”。配置类方法中用<code>@Bean</code>注册组件，<strong>配置类本身也是组件</strong>。<br>PS：配置类相当于曾经的配置文件</p>
+<h2 id="Full模式与Lite模式"><a href="#Full模式与Lite模式" class="headerlink" title="Full模式与Lite模式"></a>Full模式与Lite模式</h2><p>该标签可以有参数<code>@Configuration(proxyBeanMethods = true/false)</code>用于控制是否为“代理组件方法”。二者区别</p>
+<ul>
+<li>Lite模式：<br>【保证每个@Bean方法被调用多少次返回的组件都是单实例的】，用于【配置类组件之间无依赖关系】</li>
+<li>Full模式：<br>【每个@Bean方法被调用多少次返回的组件都是新创建的】用于【配置类组件之间有依赖关系】<h2 id="组件注册-Bean"><a href="#组件注册-Bean" class="headerlink" title="组件注册(@Bean)"></a>组件注册(@Bean)</h2>配置类里面使用@Bean标注在方法上给容器注册组件，默认是单实例的。</li>
+</ul>
+<p>注册时，默认以<strong>方法名 = 组件id</strong>，<strong>返回类型 = 组件类型</strong>，<strong>返回的值 = 组件在容器中的实例</strong><br><strong>自定义组件名</strong>：如果在<code>@Bean(&quot;name&quot;)</code>则组件名(组件ID)就设定为name</p>
+<p>配置类示例：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*已经有了User类和Pet类，位于`com.xxx.xxx.boot.bean`包下*/</span></span><br><span class="line"></span><br><span class="line"><span class="meta">@Configuration(proxyBeanMethods = false)</span> <span class="comment">//配置类 lite模式</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MyConfig</span> </span>&#123;</span><br><span class="line">	</span><br><span class="line">    <span class="meta">@Bean</span> </span><br><span class="line">    <span class="function"><span class="keyword">public</span> User <span class="title">user01</span><span class="params">()</span></span>&#123;</span><br><span class="line">        User zhangsan = <span class="keyword">new</span> User(<span class="string">&quot;zhangsan&quot;</span>, <span class="number">18</span>);</span><br><span class="line">        <span class="comment">//user组件依赖了Pet组件：lite模式下，这是一个全新的组件</span></span><br><span class="line">        zhangsan.setPet(tomcatPet());</span><br><span class="line">        <span class="keyword">return</span> zhangsan;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Bean(&quot;tom&quot;)</span><span class="comment">//定义组件名</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Pet <span class="title">tomcatPet</span><span class="params">()</span></span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> Pet(<span class="string">&quot;tomcat&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="组件注册-Import"><a href="#组件注册-Import" class="headerlink" title="组件注册(@Import)"></a>组件注册(@Import)</h2><p><code>@Configuration</code>使用<code>@Import(&#123;构造器, 构造器&#125;)</code>的方式也可以注册对应类型的组件，此时组件名为“<strong>全类名</strong>”<br>示例：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*写在类之前*/</span></span><br><span class="line"><span class="meta">@Import(&#123;User.class, DBHelper.class&#125;)</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="条件装配-Conditional"><a href="#条件装配-Conditional" class="headerlink" title="条件装配(@Conditional)"></a>条件装配(@Conditional)</h2><p>这个注解的意思是，只有满足给定条件，对应代码才生效。十分常用的功能。<br>打开<code>@Conditional</code>的依赖树，看以看到很多子注解<br><img src="01.png" alt="各种条件装配"></p>
+<p>下面以<code>@ConditionalOnBean</code>为例展示用法(示例上上一个大体相同，只是加了注解和**@Import**):</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*已经有了User类和Pet类，位于`com.xxx.xxx.boot.bean`包下*/</span></span><br><span class="line"></span><br><span class="line"><span class="meta">@Import(&#123;User.class, DBHelper.class&#125;)</span></span><br><span class="line"><span class="meta">@Configuration(proxyBeanMethods = false)</span> <span class="comment">//配置类 lite模式</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MyConfig</span> </span>&#123;</span><br><span class="line">	</span><br><span class="line">	<span class="meta">@ConditionalOnBean(name = &quot;com.atguigu.boot.bean.User&quot;)</span></span><br><span class="line">	<span class="comment">// 条件装配注解，如果容器有name=com.atguigu.boot.bean.User的组件这个user01 组件才注册代码才生效</span></span><br><span class="line">    <span class="meta">@Bean</span> </span><br><span class="line">    <span class="function"><span class="keyword">public</span> User <span class="title">user01</span><span class="params">()</span></span>&#123;</span><br><span class="line">        User zhangsan = <span class="keyword">new</span> User(<span class="string">&quot;zhangsan&quot;</span>, <span class="number">18</span>);</span><br><span class="line">        <span class="comment">//user组件依赖了Pet组件：lite模式下，这是一个全新的组件</span></span><br><span class="line">        zhangsan.setPet(tomcatPet());</span><br><span class="line">        <span class="keyword">return</span> zhangsan;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Bean(&quot;tom&quot;)</span><span class="comment">//定义组件名</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Pet <span class="title">tomcatPet</span><span class="params">()</span></span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> Pet(<span class="string">&quot;tomcat&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="测试类的写法"><a href="#测试类的写法" class="headerlink" title="测试类的写法"></a>测试类的写法</h2><p>在主函数写测试类，对应上述示例。测试类如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@SpringBootApplication</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MainApplication</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        <span class="comment">//1、返回IOC容器</span></span><br><span class="line">        ConfigurableApplicationContext run = SpringApplication.run(MainApplication.class, args);</span><br><span class="line"><span class="comment">//-------------------------------------------------------------</span></span><br><span class="line">        <span class="comment">//2、遍历容器里的组件</span></span><br><span class="line">        String[] names = run.getBeanDefinitionNames();</span><br><span class="line">        <span class="keyword">for</span>(String name : names)&#123;</span><br><span class="line">            System.out.println(name);</span><br><span class="line">        &#125;</span><br><span class="line"><span class="comment">//-------------------------------------------------------------</span></span><br><span class="line">        <span class="comment">//3、从容器中获取组件 getBean(组件名, 类型)</span></span><br><span class="line">        Pet tom1 = run.getBean(<span class="string">&quot;tom&quot;</span>, Pet.class);</span><br><span class="line">        Pet tom2 = run.getBean(<span class="string">&quot;tom&quot;</span>, Pet.class);</span><br><span class="line">		<span class="comment">//这里判断了在 full 和 lite 下，组件是非时同一个</span></span><br><span class="line">        System.out.println(<span class="string">&quot;组件&quot;</span> + (tom1 == tom2));</span><br><span class="line">		<span class="comment">//这里证明了 “Configuration也是一个组件”</span></span><br><span class="line">		System.out.println(run.getBean(MyConfig.class));</span><br><span class="line"><span class="comment">//-------------------------------------------------------------</span></span><br><span class="line">        <span class="comment">//4、从容器中获取组件名 getBeanNamesForType(类型)</span></span><br><span class="line">        String[] beanNamesForType = run.getBeanNamesForType(User.class);</span><br><span class="line">        System.out.println(<span class="string">&quot;=========&quot;</span>);</span><br><span class="line">        <span class="keyword">for</span> (String s : beanNamesForType) &#123;</span><br><span class="line">            System.out.println(s);</span><br><span class="line">        &#125;</span><br><span class="line"><span class="comment">//-------------------------------------------------------------</span></span><br><span class="line">        <span class="comment">//5、组件存在判断（条件装配） containsBean(&quot;name&quot;)</span></span><br><span class="line">        <span class="keyword">boolean</span> tom = run.containsBean(<span class="string">&quot;tom&quot;</span>);</span><br><span class="line">        System.out.println(<span class="string">&quot;tom:&quot;</span>+tom);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">boolean</span> user01 = run.containsBean(<span class="string">&quot;user01&quot;</span>);</span><br><span class="line">        System.out.println(<span class="string">&quot;user01:&quot;</span>+user01);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">boolean</span> tom22 = run.containsBean(<span class="string">&quot;tom22&quot;</span>);</span><br><span class="line">        System.out.println(<span class="string">&quot;tom22:&quot;</span> + tom22);</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>其中使用的方法：<br>|                            方法名                            |                   说明                   |<br>| :———————————————————-: | :————————————–: |<br>| ConfigurableApplicationContext run = SpringApplication.run(MainApplication.class, args); |         【标准写法】返回IOC容器          |<br>|            String[] run.getBeanDefinitionNames()             |     返回容器中所有组件名的String数组     |<br>|         String[] run.getBeanNamesForType(xxx.class)          | 返回容器所有“给定类型”的组件名String数组 |<br>|                类型 run.getBean(组件名, 类型)                |        返回对应组件名与类型的组件        |<br>|              boolean run.containsBean(“组件名”)              |      返回容器是否存在对应名字的组件      |</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E9%85%8D%E7%BD%AE%E7%B1%BB/" rel="tag"># 配置类</a>
+              <a href="/tags/%E6%9D%A1%E4%BB%B6%E8%A3%85%E9%85%8D/" rel="tag"># 条件装配</a>
+              <a href="/tags/Bean%E7%BB%84%E4%BB%B6/" rel="tag"># Bean组件</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/10/02/SpringBoot2%E2%80%94%E4%BE%9D%E8%B5%96%E7%AE%A1%E7%90%86%E3%80%81starter%E5%AF%BC%E5%85%A5%E4%B8%8E%E5%8C%85%E7%BB%93%E6%9E%84/" rel="prev" title="SpringBoot2—依赖管理、starter导入与包结构">
+      <i class="fa fa-chevron-left"></i> SpringBoot2—依赖管理、starter导入与包结构
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="valine-comments"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%85%8D%E7%BD%AE%E7%B1%BB%E6%A6%82%E8%BF%B0-Configuration"><span class="nav-number">1.</span> <span class="nav-text">配置类概述(@Configuration)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Full%E6%A8%A1%E5%BC%8F%E4%B8%8ELite%E6%A8%A1%E5%BC%8F"><span class="nav-number">2.</span> <span class="nav-text">Full模式与Lite模式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BB%84%E4%BB%B6%E6%B3%A8%E5%86%8C-Bean"><span class="nav-number">3.</span> <span class="nav-text">组件注册(@Bean)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BB%84%E4%BB%B6%E6%B3%A8%E5%86%8C-Import"><span class="nav-number">4.</span> <span class="nav-text">组件注册(@Import)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9D%A1%E4%BB%B6%E8%A3%85%E9%85%8D-Conditional"><span class="nav-number">5.</span> <span class="nav-text">条件装配(@Conditional)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B5%8B%E8%AF%95%E7%B1%BB%E7%9A%84%E5%86%99%E6%B3%95"><span class="nav-number">6.</span> <span class="nav-text">测试类的写法</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="海の咲"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">海の咲</p>
+  <div class="site-description" itemprop="description">商品绝赞追加中</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">12</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/uminosaki" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;uminosaki" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:railmisachu@outlook.com" title="E-Mail → mailto:railmisachu@outlook.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">海の咲</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+
+<script>
+NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
+  NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+    var GUEST = ['nick', 'mail', 'link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item => {
+      return GUEST.includes(item);
+    });
+    new Valine({
+      el         : '#valine-comments',
+      verify     : true,
+      notify     : true,
+      appId      : 'ys4eYd27IL7M3JNcQiQIQghD-MdYXbMMI',
+      appKey     : 'BiF7Wym6Ved3aDPqJcfYKFPY',
+      placeholder: "请输入评论",
+      avatar     : 'mm',
+      meta       : guest,
+      pageSize   : '10' || 10,
+      visitor    : false,
+      lang       : 'zh-cn' || 'zh-cn',
+      path       : location.pathname,
+      recordIP   : false,
+      serverURLs : ''
+    });
+  }, window.Valine);
+});
+</script>
+
+</body>
+</html>
