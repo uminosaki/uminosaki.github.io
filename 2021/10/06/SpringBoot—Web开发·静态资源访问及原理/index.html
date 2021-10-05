@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-minimal.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"manual","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="这里记录了Web开发中简单的静态资源访问方法与其源码分析过程。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SpringBoot—Web开发·静态资源访问及原理">
+<meta property="og:url" content="http://example.com/2021/10/06/SpringBoot%E2%80%94Web%E5%BC%80%E5%8F%91%C2%B7%E9%9D%99%E6%80%81%E8%B5%84%E6%BA%90%E8%AE%BF%E9%97%AE%E5%8F%8A%E5%8E%9F%E7%90%86/index.html">
+<meta property="og:site_name" content="海の咲的杂货铺">
+<meta property="og:description" content="这里记录了Web开发中简单的静态资源访问方法与其源码分析过程。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/2021/10/06/SpringBoot%E2%80%94Web%E5%BC%80%E5%8F%91%C2%B7%E9%9D%99%E6%80%81%E8%B5%84%E6%BA%90%E8%AE%BF%E9%97%AE%E5%8F%8A%E5%8E%9F%E7%90%86/01.png">
+<meta property="og:image" content="http://example.com/2021/10/06/SpringBoot%E2%80%94Web%E5%BC%80%E5%8F%91%C2%B7%E9%9D%99%E6%80%81%E8%B5%84%E6%BA%90%E8%AE%BF%E9%97%AE%E5%8F%8A%E5%8E%9F%E7%90%86/02.png">
+<meta property="og:image" content="http://example.com/2021/10/06/SpringBoot%E2%80%94Web%E5%BC%80%E5%8F%91%C2%B7%E9%9D%99%E6%80%81%E8%B5%84%E6%BA%90%E8%AE%BF%E9%97%AE%E5%8F%8A%E5%8E%9F%E7%90%86/03.png">
+<meta property="article:published_time" content="2021-10-05T16:24:45.000Z">
+<meta property="article:modified_time" content="2021-10-05T16:33:23.097Z">
+<meta property="article:author" content="海の咲">
+<meta property="article:tag" content="web开发">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/2021/10/06/SpringBoot%E2%80%94Web%E5%BC%80%E5%8F%91%C2%B7%E9%9D%99%E6%80%81%E8%B5%84%E6%BA%90%E8%AE%BF%E9%97%AE%E5%8F%8A%E5%8E%9F%E7%90%86/01.png">
+
+<link rel="canonical" href="http://example.com/2021/10/06/SpringBoot%E2%80%94Web%E5%BC%80%E5%8F%91%C2%B7%E9%9D%99%E6%80%81%E8%B5%84%E6%BA%90%E8%AE%BF%E9%97%AE%E5%8F%8A%E5%8E%9F%E7%90%86/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>SpringBoot—Web开发·静态资源访问及原理 | 海の咲的杂货铺</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">海の咲的杂货铺</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-resources">
+
+    <a href="/resources/" rel="section"><i class="fa fa-download fa-fw"></i>资源库</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/10/06/SpringBoot%E2%80%94Web%E5%BC%80%E5%8F%91%C2%B7%E9%9D%99%E6%80%81%E8%B5%84%E6%BA%90%E8%AE%BF%E9%97%AE%E5%8F%8A%E5%8E%9F%E7%90%86/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="海の咲">
+      <meta itemprop="description" content="商品绝赞追加中">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="海の咲的杂货铺">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          SpringBoot—Web开发·静态资源访问及原理
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2021-10-06 00:24:45 / 修改时间：00:33:23" itemprop="dateCreated datePublished" datetime="2021-10-06T00:24:45+08:00">2021-10-06</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/SpringBoot/" itemprop="url" rel="index"><span itemprop="name">SpringBoot</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2021/10/06/SpringBoot%E2%80%94Web%E5%BC%80%E5%8F%91%C2%B7%E9%9D%99%E6%80%81%E8%B5%84%E6%BA%90%E8%AE%BF%E9%97%AE%E5%8F%8A%E5%8E%9F%E7%90%86/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2021/10/06/SpringBoot%E2%80%94Web%E5%BC%80%E5%8F%91%C2%B7%E9%9D%99%E6%80%81%E8%B5%84%E6%BA%90%E8%AE%BF%E9%97%AE%E5%8F%8A%E5%8E%9F%E7%90%86/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>这里记录了Web开发中简单的静态资源访问方法与其源码分析过程。</p>
+<span id="more"></span>
+
+<h2 id="静态资源目录"><a href="#静态资源目录" class="headerlink" title="静态资源目录"></a>静态资源目录</h2><p>这里的静态资源包含“静态资源访问目录”和“静态资源所在目录”。所有静态资源都要放到“静态资源所在目录”下才能通过路径访问。</p>
+<h3 id="默认配置"><a href="#默认配置" class="headerlink" title="默认配置"></a>默认配置</h3><ul>
+<li>静态资源所在目录：<br>/static (or /public or /resources or /META-INF/resources)</li>
+<li>静态资源访问目录 ：</li>
+<li>当前项目根路径/ + 静态资源名 </li>
+<li>静态资源访问原理：<br>静态映射<code>/**</code>。</li>
+<li>静态资源访问流程：<br>请求进来，先去找Controller能否处理。不能处理的所有请求又都交给静态资源处理器。静态资源也找不到则响应404页面<h3 id="自定路径"><a href="#自定路径" class="headerlink" title="自定路径"></a>自定路径</h3>可以做到<strong>自定义静态资源访问路径</strong> 和 <strong>自定义静态资源所在路径</strong><br>方法如下：<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">spring:</span></span><br><span class="line">  <span class="attr">mvc:</span></span><br><span class="line">    <span class="comment">#自定义静态资源访问路径</span></span><br><span class="line">    <span class="attr">static-path-pattern:</span> <span class="string">/res/**</span></span><br><span class="line"></span><br><span class="line">  <span class="attr">resources:</span></span><br><span class="line">    <span class="comment">#自定义静态资源所在路径</span></span><br><span class="line">    <span class="attr">static-locations:</span> [<span class="string">classpath:/haha/</span>]</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h3 id="静态资源的访问"><a href="#静态资源的访问" class="headerlink" title="静态资源的访问"></a>静态资源的访问</h3><p>我们只需要访问 <code>项目名/static-path-pattern(自定义的访问前缀)/静态资源名</code> 即可访问静态资源。<br>例如：<code>localhost:8080/res/xxx.jpg</code><br>上述地址中，<code>static-path-pattern</code>并非真实存在的目录，而是由我们自行配置的。</p>
+<h2 id="欢迎页与Favicon"><a href="#欢迎页与Favicon" class="headerlink" title="欢迎页与Favicon"></a>欢迎页与Favicon</h2><p>欢迎页是静态资源路径下的<strong>index.html</strong>；Favicon 是静态资源路径下的<strong>Favicon.jpg</strong>(png/gif)。</p>
+<ul>
+<li>配置时需要遵循如下两点：<ul>
+<li>可以配置静态资源路径。即可以配置<code>static-locations</code></li>
+<li>不可以配置静态资源的访问前缀，否则导致 index.html不能被默认访问。即不能配<code>static-path-pattern</code></li>
+</ul>
+</li>
+</ul>
+<h1 id="静态资源配置原理"><a href="#静态资源配置原理" class="headerlink" title="静态资源配置原理"></a>静态资源配置原理</h1><h2 id="条件装配"><a href="#条件装配" class="headerlink" title="条件装配"></a>条件装配</h2><ul>
+<li>SpringBoot启动时加载xxxxAutoConfiguration。</li>
+<li>跟进SpringMVC功能的自动配置类 WebMvcAutoConfiguration</li>
+</ul>
+<p>通过观察下面的条件装配代码，我们知道了，何时会使自动配置生效</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* 此处注释针对上一行 */</span></span><br><span class="line"></span><br><span class="line"><span class="meta">@Configuration(proxyBeanMethods = false)</span></span><br><span class="line"><span class="meta">@ConditionalOnWebApplication(type = Type.SERVLET)</span> </span><br><span class="line"><span class="comment">//满足：只要是Web应用就OK</span></span><br><span class="line"><span class="meta">@ConditionalOnClass(&#123; Servlet.class, DispatcherServlet.class, WebMvcConfigurer.class &#125;)</span></span><br><span class="line"><span class="comment">//满足：上面三个类在导包后就有了</span></span><br><span class="line"><span class="meta">@ConditionalOnMissingBean(WebMvcConfigurationSupport.class)</span></span><br><span class="line"><span class="comment">//关键：</span></span><br><span class="line"><span class="meta">@AutoConfigureOrder(Ordered.HIGHEST_PRECEDENCE + 10)</span></span><br><span class="line"><span class="meta">@AutoConfigureAfter(&#123; DispatcherServletAutoConfiguration.class, TaskExecutionAutoConfiguration.class,</span></span><br><span class="line"><span class="meta">		ValidationAutoConfiguration.class &#125;)</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">WebMvcAutoConfiguration</span> </span>&#123;&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="具体为容器配置内容"><a href="#具体为容器配置内容" class="headerlink" title="具体为容器配置内容"></a>具体为容器配置内容</h3><p>这里我们按照下面的顺序去分析底层原理。</p>
+<h4 id="1、想要知道具体容器中注册了什么"><a href="#1、想要知道具体容器中注册了什么" class="headerlink" title="1、想要知道具体容器中注册了什么"></a>1、想要知道具体容器中注册了什么</h4><p>我们就要去关注 <strong><code>@EnableConfigurationProperties(xxx.class)</code></strong> 这个注解。<br>（因为，这个注解会为类进行参数绑定）</p>
+<p>相关代码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Configuration(proxyBeanMethods = false)</span></span><br><span class="line"><span class="meta">@Import(EnableWebMvcConfiguration.class)</span></span><br><span class="line"><span class="meta">@EnableConfigurationProperties(&#123; WebMvcProperties.class, ResourceProperties.class &#125;)</span></span><br><span class="line"><span class="meta">@Order(0)</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">WebMvcAutoConfigurationAdapter</span> <span class="keyword">implements</span> <span class="title">WebMvcConfigurer</span> </span>&#123;&#125;</span><br></pre></td></tr></table></figure>
+
+<p>通过这个代码我们知道，除了这个配置类本身，还有<code>WebMvcProperties.class</code>和<code>ResourceProperties.class</code>这两个类被<strong>绑定</strong>和<strong>注册</strong>到容器中。</p>
+<h4 id="2、跟踪这两个类"><a href="#2、跟踪这两个类" class="headerlink" title="2、跟踪这两个类"></a>2、跟踪这两个类</h4><p>我们发现，这两个类指定的配置前缀分别为：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//=====WebMvcProperties.class=====</span></span><br><span class="line"><span class="meta">@ConfigurationProperties(</span></span><br><span class="line"><span class="meta">    prefix = &quot;spring.mvc&quot;</span></span><br><span class="line"><span class="meta">)</span></span><br><span class="line"></span><br><span class="line">/=====ResourceProperties.class=====</span><br><span class="line"><span class="meta">@ConfigurationProperties(</span></span><br><span class="line"><span class="meta">    prefix = &quot;spring.resources&quot;,</span></span><br><span class="line"><span class="meta">    ignoreUnknownFields = false</span></span><br><span class="line"><span class="meta">)</span></span><br></pre></td></tr></table></figure>
+
+<p>即：配置文件中 spring.mvc  spring.resources  的参数配绑定了，这也就解释了，我们上面yaml 配置未见为何要这么写</p>
+<h4 id="3、分析配置类"><a href="#3、分析配置类" class="headerlink" title="3、分析配置类"></a>3、分析配置类</h4><p>回到配置类本身。关注<code>public static class WebMvcAutoConfigurationAdapter implements WebMvcConfigurer &#123;...&#125;</code>的方法体，开始分析。</p>
+<h5 id="1、构造函数-WebMvcAutoConfigurationAdapter"><a href="#1、构造函数-WebMvcAutoConfigurationAdapter" class="headerlink" title="1、构造函数 WebMvcAutoConfigurationAdapter"></a>1、构造函数 WebMvcAutoConfigurationAdapter</h5><p>我们看到<strong>配置类只有唯一带参构造函数</strong>。<br>当一个配置类只有唯一带参构造函数时，所有参数的值，都会从容器确定</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">WebMvcAutoConfigurationAdapter</span><span class="params">(ResourceProperties resourceProperties, </span></span></span><br><span class="line"><span class="params"><span class="function">			  WebMvcProperties mvcProperties, ListableBeanFactory beanFactory, </span></span></span><br><span class="line"><span class="params"><span class="function">			  ObjectProvider&lt;HttpMessageConverters&gt; messageConvertersProvider, </span></span></span><br><span class="line"><span class="params"><span class="function">			  ObjectProvider&lt;WebMvcAutoConfiguration.ResourceHandlerRegistrationCustomizer&gt; resourceHandlerRegistrationCustomizerProvider, </span></span></span><br><span class="line"><span class="params"><span class="function">			  ObjectProvider&lt;DispatcherServletPath&gt; dispatcherServletPath, </span></span></span><br><span class="line"><span class="params"><span class="function">			  ObjectProvider&lt;ServletRegistrationBean&lt;?&gt;&gt; servletRegistrations)</span> </span>&#123;</span><br><span class="line">    ...方法体...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>对上述传参的分析：</p>
+<ul>
+<li>ResourceProperties resourceProperties；获取和spring.resources绑定的所有的值的对象</li>
+<li>WebMvcProperties mvcProperties 获取和spring.mvc绑定的所有的值的对象</li>
+<li>ListableBeanFactory beanFactory Spring的beanFactory</li>
+<li>HttpMessageConverters 找到所有的HttpMessageConverters</li>
+<li>ResourceHandlerRegistrationCustomizer 找到 资源处理器的自定义器。=========</li>
+<li>DispatcherServletPath</li>
+<li>ServletRegistrationBean 给应用注册Servlet、Filter….</li>
+</ul>
+<h5 id="2、资源处理的默认规则"><a href="#2、资源处理的默认规则" class="headerlink" title="2、资源处理的默认规则"></a>2、资源处理的默认规则</h5><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line">		<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">addResourceHandlers</span><span class="params">(ResourceHandlerRegistry registry)</span> </span>&#123;</span><br><span class="line">			<span class="keyword">if</span> (!<span class="keyword">this</span>.resourceProperties.isAddMappings()) &#123;</span><br><span class="line">				logger.debug(<span class="string">&quot;Default resource handling disabled&quot;</span>);</span><br><span class="line">				<span class="keyword">return</span>;</span><br><span class="line">			&#125;</span><br><span class="line">			Duration cachePeriod = <span class="keyword">this</span>.resourceProperties.getCache().getPeriod();</span><br><span class="line">			CacheControl cacheControl = <span class="keyword">this</span>.resourceProperties.getCache().getCachecontrol().toHttpCacheControl();</span><br><span class="line">			<span class="comment">//webjars的规则</span></span><br><span class="line">            <span class="keyword">if</span> (!registry.hasMappingForPattern(<span class="string">&quot;/webjars/**&quot;</span>)) &#123;</span><br><span class="line">				customizeResourceHandlerRegistration(registry.addResourceHandler(<span class="string">&quot;/webjars/**&quot;</span>)</span><br><span class="line">						.addResourceLocations(<span class="string">&quot;classpath:/META-INF/resources/webjars/&quot;</span>)</span><br><span class="line">						.setCachePeriod(getSeconds(cachePeriod)).setCacheControl(cacheControl));</span><br><span class="line">			&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>PART1：</strong><br>我们看第3行的 if 判断中的<code>isAddMappings</code>。追踪后看到<br><img src="01.png" alt="01.png"><br>这里由<code>addMapings</code>决定，默认为 true。如果我们在配置文件这么写：就可以<strong>禁用所有静态资源</strong>。</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">spring:</span></span><br><span class="line">  <span class="attr">resources:</span></span><br><span class="line">    <span class="attr">add-mappings:</span> <span class="literal">false</span>   <span class="comment"># 禁用所有静态资源规则</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>PART2：</strong><br>我们再看这个代码第6行：<code>Duration cachePeriod = this.resourceProperties.getCache().getPeriod();</code><br>追踪<code>getPeriod()</code>，我们看到了<br><img src="02.png" alt="02.png"><br>这里可以<strong>配置缓存策略</strong> 单位是<strong>秒</strong><br>配置：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">spring:</span></span><br><span class="line">    <span class="attr">cache:</span></span><br><span class="line">      <span class="attr">period:</span> <span class="number">11000</span> <span class="comment"># 缓存保存多少秒</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>PART3：</strong><br>再看剩下的部分：<br><img src="03.png" alt="03.png"></p>
+<h5 id="3、欢迎页的处理规则"><a href="#3、欢迎页的处理规则" class="headerlink" title="3、欢迎页的处理规则"></a>3、欢迎页的处理规则</h5><p> HandlerMapping：处理器映射。保存了每一个Handler能处理哪些请求。</p>
+ <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">HandlerMapping：处理器映射。保存了每一个Handler能处理哪些请求。	</span><br><span class="line"></span><br><span class="line"><span class="meta">@Bean</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> WelcomePageHandlerMapping <span class="title">welcomePageHandlerMapping</span><span class="params">(ApplicationContext applicationContext,</span></span></span><br><span class="line"><span class="params"><span class="function">			FormattingConversionService mvcConversionService, ResourceUrlProvider mvcResourceUrlProvider)</span> </span>&#123;</span><br><span class="line">		WelcomePageHandlerMapping welcomePageHandlerMapping = <span class="keyword">new</span> WelcomePageHandlerMapping(</span><br><span class="line">				<span class="keyword">new</span> TemplateAvailabilityProviders(applicationContext), applicationContext, getWelcomePage(),</span><br><span class="line">				<span class="keyword">this</span>.mvcProperties.getStaticPathPattern());</span><br><span class="line">		welcomePageHandlerMapping.setInterceptors(getInterceptors(mvcConversionService, mvcResourceUrlProvider));</span><br><span class="line">		welcomePageHandlerMapping.setCorsConfigurations(getCorsConfigurations());</span><br><span class="line">		<span class="keyword">return</span> welcomePageHandlerMapping;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>追踪<code>WelcomePageHandlerMapping</code>返回值类型</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">WelcomePageHandlerMapping(TemplateAvailabilityProviders templateAvailabilityProviders,</span><br><span class="line">		ApplicationContext applicationContext, Optional&lt;Resource&gt; welcomePage, String staticPathPattern) &#123;</span><br><span class="line">	<span class="keyword">if</span> (welcomePage.isPresent() &amp;&amp; <span class="string">&quot;/**&quot;</span>.equals(staticPathPattern)) &#123;</span><br><span class="line">           <span class="comment">//要用欢迎页功能，必须是/**</span></span><br><span class="line">		logger.info(<span class="string">&quot;Adding welcome page: &quot;</span> + welcomePage.get());</span><br><span class="line">		setRootViewName(<span class="string">&quot;forward:index.html&quot;</span>);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">else</span> <span class="keyword">if</span> (welcomeTemplateExists(templateAvailabilityProviders, applicationContext)) &#123;</span><br><span class="line">           <span class="comment">// 调用Controller  /index</span></span><br><span class="line">		logger.info(<span class="string">&quot;Adding welcome page template: index&quot;</span>);</span><br><span class="line">		setRootViewName(<span class="string">&quot;index&quot;</span>);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>我们发现要想使用静态欢迎页，必须满足：<br>“welcomePage.isPresent() 欢迎页存在” 和 “staticPathPattern 必须是 /** ”</p>
+<h2 id="总结："><a href="#总结：" class="headerlink" title="总结："></a>总结：</h2><h3 id="静态配置方法"><a href="#静态配置方法" class="headerlink" title="静态配置方法"></a>静态配置方法</h3><p>本文涉及的静态配置方法</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">spring:</span></span><br><span class="line">  <span class="attr">mvc:</span></span><br><span class="line">    <span class="comment">#指定静态资源访问路径前缀</span></span><br><span class="line">    <span class="attr">static-path-pattern:</span> <span class="string">/res/**</span>   <span class="comment">#这个会导致welcome page功能失效</span></span><br><span class="line"></span><br><span class="line">  <span class="attr">resources:</span></span><br><span class="line">    <span class="comment">#指定静态资源路径</span></span><br><span class="line">    <span class="attr">static-locations:</span> [<span class="string">classpath:/haha/</span>]</span><br><span class="line">	  <span class="comment">#是否禁用静态资源</span></span><br><span class="line">    <span class="attr">add-mappings:</span> <span class="literal">true</span></span><br><span class="line">    <span class="attr">cache:</span></span><br><span class="line">      <span class="comment">#指定缓存时间</span></span><br><span class="line">      <span class="attr">period:</span> <span class="number">11000</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="本次使用的源码分析方法总结"><a href="#本次使用的源码分析方法总结" class="headerlink" title="本次使用的源码分析方法总结"></a>本次使用的源码分析方法总结</h3><ol>
+<li>关注 <strong>@EnableConfigurationProperties(xxx.class)</strong> ：了解那些类被绑定并注入容器</li>
+<li>跟进上述类，看 <strong>@ConfigurationProperties(prefix = “spring.mvc”)</strong> 了解配置文件绑定前缀</li>
+<li>看 配置类方法 的 <strong>if(…){…}语句</strong> 了解是否可以禁用某些功能</li>
+<li>追 配置类方法 的 <strong>get(…)方法</strong> –&gt; <strong>return 返回值</strong> –&gt; <strong>同类搜索关键词</strong> 了解某些值的初始赋值 和 配置方法</li>
+<li>有时，也可以利用 提示功能 ，先配 yaml 对应参数 再从 yaml 的 参数反向追踪源码，了解底层原理</li>
+</ol>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/web%E5%BC%80%E5%8F%91/" rel="tag"># web开发</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/10/05/SpringBoot%E2%80%94%E4%BD%BF%E7%94%A8YAML%E8%BF%9B%E8%A1%8C%E9%85%8D%E7%BD%AE%E7%BB%91%E5%AE%9A/" rel="prev" title="SpringBoot—使用YAML进行配置绑定">
+      <i class="fa fa-chevron-left"></i> SpringBoot—使用YAML进行配置绑定
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="valine-comments"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%9D%99%E6%80%81%E8%B5%84%E6%BA%90%E7%9B%AE%E5%BD%95"><span class="nav-number">1.</span> <span class="nav-text">静态资源目录</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%BB%98%E8%AE%A4%E9%85%8D%E7%BD%AE"><span class="nav-number">1.1.</span> <span class="nav-text">默认配置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%87%AA%E5%AE%9A%E8%B7%AF%E5%BE%84"><span class="nav-number">1.2.</span> <span class="nav-text">自定路径</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%9D%99%E6%80%81%E8%B5%84%E6%BA%90%E7%9A%84%E8%AE%BF%E9%97%AE"><span class="nav-number">1.3.</span> <span class="nav-text">静态资源的访问</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%AC%A2%E8%BF%8E%E9%A1%B5%E4%B8%8EFavicon"><span class="nav-number">2.</span> <span class="nav-text">欢迎页与Favicon</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E9%9D%99%E6%80%81%E8%B5%84%E6%BA%90%E9%85%8D%E7%BD%AE%E5%8E%9F%E7%90%86"><span class="nav-number"></span> <span class="nav-text">静态资源配置原理</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9D%A1%E4%BB%B6%E8%A3%85%E9%85%8D"><span class="nav-number">1.</span> <span class="nav-text">条件装配</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%B7%E4%BD%93%E4%B8%BA%E5%AE%B9%E5%99%A8%E9%85%8D%E7%BD%AE%E5%86%85%E5%AE%B9"><span class="nav-number">1.1.</span> <span class="nav-text">具体为容器配置内容</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1%E3%80%81%E6%83%B3%E8%A6%81%E7%9F%A5%E9%81%93%E5%85%B7%E4%BD%93%E5%AE%B9%E5%99%A8%E4%B8%AD%E6%B3%A8%E5%86%8C%E4%BA%86%E4%BB%80%E4%B9%88"><span class="nav-number">1.1.1.</span> <span class="nav-text">1、想要知道具体容器中注册了什么</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2%E3%80%81%E8%B7%9F%E8%B8%AA%E8%BF%99%E4%B8%A4%E4%B8%AA%E7%B1%BB"><span class="nav-number">1.1.2.</span> <span class="nav-text">2、跟踪这两个类</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3%E3%80%81%E5%88%86%E6%9E%90%E9%85%8D%E7%BD%AE%E7%B1%BB"><span class="nav-number">1.1.3.</span> <span class="nav-text">3、分析配置类</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#1%E3%80%81%E6%9E%84%E9%80%A0%E5%87%BD%E6%95%B0-WebMvcAutoConfigurationAdapter"><span class="nav-number">1.1.3.1.</span> <span class="nav-text">1、构造函数 WebMvcAutoConfigurationAdapter</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#2%E3%80%81%E8%B5%84%E6%BA%90%E5%A4%84%E7%90%86%E7%9A%84%E9%BB%98%E8%AE%A4%E8%A7%84%E5%88%99"><span class="nav-number">1.1.3.2.</span> <span class="nav-text">2、资源处理的默认规则</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#3%E3%80%81%E6%AC%A2%E8%BF%8E%E9%A1%B5%E7%9A%84%E5%A4%84%E7%90%86%E8%A7%84%E5%88%99"><span class="nav-number">1.1.3.3.</span> <span class="nav-text">3、欢迎页的处理规则</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93%EF%BC%9A"><span class="nav-number">2.</span> <span class="nav-text">总结：</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%9D%99%E6%80%81%E9%85%8D%E7%BD%AE%E6%96%B9%E6%B3%95"><span class="nav-number">2.1.</span> <span class="nav-text">静态配置方法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9C%AC%E6%AC%A1%E4%BD%BF%E7%94%A8%E7%9A%84%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E6%96%B9%E6%B3%95%E6%80%BB%E7%BB%93"><span class="nav-number">2.2.</span> <span class="nav-text">本次使用的源码分析方法总结</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="海の咲"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">海の咲</p>
+  <div class="site-description" itemprop="description">商品绝赞追加中</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">17</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">13</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/uminosaki" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;uminosaki" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:railmisachu@outlook.com" title="E-Mail → mailto:railmisachu@outlook.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">海の咲</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+
+<script>
+NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
+  NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+    var GUEST = ['nick', 'mail', 'link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item => {
+      return GUEST.includes(item);
+    });
+    new Valine({
+      el         : '#valine-comments',
+      verify     : true,
+      notify     : true,
+      appId      : 'ys4eYd27IL7M3JNcQiQIQghD-MdYXbMMI',
+      appKey     : 'BiF7Wym6Ved3aDPqJcfYKFPY',
+      placeholder: "请输入评论",
+      avatar     : 'mm',
+      meta       : guest,
+      pageSize   : '10' || 10,
+      visitor    : false,
+      lang       : 'zh-cn' || 'zh-cn',
+      path       : location.pathname,
+      recordIP   : false,
+      serverURLs : ''
+    });
+  }, window.Valine);
+});
+</script>
+
+</body>
+</html>
