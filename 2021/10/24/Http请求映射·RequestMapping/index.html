@@ -22,23 +22,20 @@
     var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"manual","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
   </script>
 
-  <meta name="description" content="IDEA提供 Spring Initailizr （项目初始化向导）来方便我们创建 SpringBoot 项目，但是在使用过程中依然可能会遇到一些问题。这里记录了通过 Spring Initailizr 创建项目的方式、创建低版本SpringBoot 项目的方法，以及找不到 Spring Initailizr 创建选项时的解决方法。">
+  <meta name="description" content="@RequestMapping 是 Spring Web 应用程序中最常被用到的注解之一，用于实现Http请求映射，实现指定请求 路径、方式、参数、请求头、Content-Type 的功能。下面记录此注解的常用参数和SpringBoot中提供的与之有关的组合注解（@GetMapping @PostMapping 等）。">
 <meta property="og:type" content="article">
-<meta property="og:title" content="SpringBoot—Spring Initailizr 项目创建">
-<meta property="og:url" content="http://example.com/2021/10/05/SpringBoot%E2%80%94Spring%20Initailizr%20%E9%A1%B9%E7%9B%AE%E5%88%9B%E5%BB%BA/index.html">
+<meta property="og:title" content="Http请求映射·RequestMapping">
+<meta property="og:url" content="http://example.com/2021/10/24/Http%E8%AF%B7%E6%B1%82%E6%98%A0%E5%B0%84%C2%B7RequestMapping/index.html">
 <meta property="og:site_name" content="海の咲的杂货铺">
-<meta property="og:description" content="IDEA提供 Spring Initailizr （项目初始化向导）来方便我们创建 SpringBoot 项目，但是在使用过程中依然可能会遇到一些问题。这里记录了通过 Spring Initailizr 创建项目的方式、创建低版本SpringBoot 项目的方法，以及找不到 Spring Initailizr 创建选项时的解决方法。">
+<meta property="og:description" content="@RequestMapping 是 Spring Web 应用程序中最常被用到的注解之一，用于实现Http请求映射，实现指定请求 路径、方式、参数、请求头、Content-Type 的功能。下面记录此注解的常用参数和SpringBoot中提供的与之有关的组合注解（@GetMapping @PostMapping 等）。">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="http://example.com/2021/10/05/SpringBoot%E2%80%94Spring%20Initailizr%20%E9%A1%B9%E7%9B%AE%E5%88%9B%E5%BB%BA/01.png">
-<meta property="og:image" content="http://example.com/2021/10/05/SpringBoot%E2%80%94Spring%20Initailizr%20%E9%A1%B9%E7%9B%AE%E5%88%9B%E5%BB%BA/02.png">
-<meta property="article:published_time" content="2021-10-05T05:05:00.000Z">
-<meta property="article:modified_time" content="2021-10-05T16:36:32.394Z">
+<meta property="article:published_time" content="2021-10-24T06:40:45.000Z">
+<meta property="article:modified_time" content="2021-10-24T06:50:13.507Z">
 <meta property="article:author" content="海の咲">
-<meta property="article:tag" content="SpringBoot入门">
+<meta property="article:tag" content="web开发">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="http://example.com/2021/10/05/SpringBoot%E2%80%94Spring%20Initailizr%20%E9%A1%B9%E7%9B%AE%E5%88%9B%E5%BB%BA/01.png">
 
-<link rel="canonical" href="http://example.com/2021/10/05/SpringBoot%E2%80%94Spring%20Initailizr%20%E9%A1%B9%E7%9B%AE%E5%88%9B%E5%BB%BA/">
+<link rel="canonical" href="http://example.com/2021/10/24/Http%E8%AF%B7%E6%B1%82%E6%98%A0%E5%B0%84%C2%B7RequestMapping/">
 
 
 <script id="page-configurations">
@@ -51,7 +48,7 @@
   };
 </script>
 
-  <title>SpringBoot—Spring Initailizr 项目创建 | 海の咲的杂货铺</title>
+  <title>Http请求映射·RequestMapping | 海の咲的杂货铺</title>
   
 
 
@@ -204,7 +201,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/10/05/SpringBoot%E2%80%94Spring%20Initailizr%20%E9%A1%B9%E7%9B%AE%E5%88%9B%E5%BB%BA/">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/10/24/Http%E8%AF%B7%E6%B1%82%E6%98%A0%E5%B0%84%C2%B7RequestMapping/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.jpg">
@@ -217,7 +214,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          SpringBoot—Spring Initailizr 项目创建
+          Http请求映射·RequestMapping
         </h1>
 
         <div class="post-meta">
@@ -226,16 +223,10 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
+              
 
-              <time title="创建时间：2021-10-05 13:05:00" itemprop="dateCreated datePublished" datetime="2021-10-05T13:05:00+08:00">2021-10-05</time>
+              <time title="创建时间：2021-10-24 14:40:45 / 修改时间：14:50:13" itemprop="dateCreated datePublished" datetime="2021-10-24T14:40:45+08:00">2021-10-24</time>
             </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2021-10-06 00:36:32" itemprop="dateModified" datetime="2021-10-06T00:36:32+08:00">2021-10-06</time>
-              </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
                 <i class="far fa-folder"></i>
@@ -255,8 +246,8 @@
       </span>
       <span class="post-meta-item-text">Valine：</span>
     
-    <a title="valine" href="/2021/10/05/SpringBoot%E2%80%94Spring%20Initailizr%20%E9%A1%B9%E7%9B%AE%E5%88%9B%E5%BB%BA/#valine-comments" itemprop="discussionUrl">
-      <span class="post-comments-count valine-comment-count" data-xid="/2021/10/05/SpringBoot%E2%80%94Spring%20Initailizr%20%E9%A1%B9%E7%9B%AE%E5%88%9B%E5%BB%BA/" itemprop="commentCount"></span>
+    <a title="valine" href="/2021/10/24/Http%E8%AF%B7%E6%B1%82%E6%98%A0%E5%B0%84%C2%B7RequestMapping/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2021/10/24/Http%E8%AF%B7%E6%B1%82%E6%98%A0%E5%B0%84%C2%B7RequestMapping/" itemprop="commentCount"></span>
     </a>
   </span>
   
@@ -271,33 +262,42 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <p>IDEA提供 Spring Initailizr （项目初始化向导）来方便我们创建 SpringBoot 项目，但是在使用过程中依然可能会遇到一些问题。<br>这里记录了通过 Spring Initailizr 创建项目的方式、创建低版本SpringBoot 项目的方法，以及找不到 Spring Initailizr 创建选项时的解决方法。</p>
+        <p>@RequestMapping 是 Spring Web 应用程序中最常被用到的注解之一，用于实现Http请求映射，实现指定请求 <strong>路径、方式、参数、请求头、Content-Type</strong> 的功能。<br>下面记录此注解的常用参数和SpringBoot中提供的与之有关的组合注解（@GetMapping @PostMapping 等）。</p>
 <span id="more"></span>
 
-<h2 id="Spring-Initailizr-创建项目的一般方法"><a href="#Spring-Initailizr-创建项目的一般方法" class="headerlink" title="Spring Initailizr 创建项目的一般方法"></a>Spring Initailizr 创建项目的一般方法</h2><p><strong>功能</strong><br>在创建项目时，不在需要选择创建Maven项目，而是通过这个向导创建。可以简化创建过程。</p>
-<p><strong>使用方法</strong></p>
-<ol>
-<li><p>选择创建 Spring Initailizr 项目填写信息<br><img src="01.png" alt="01.png"></p>
-</li>
-<li><p> 选择需要的开发场景<br><img src="02.png" alt="02.png"></p>
-</li>
-<li><p>等待项目生成<br>IDEA会「自动依赖引入、自动创建项目结构、自动编写好主配置类」</p>
-</li>
-</ol>
-<h2 id="创建低版本SpringBoot项目"><a href="#创建低版本SpringBoot项目" class="headerlink" title="创建低版本SpringBoot项目"></a>创建低版本SpringBoot项目</h2><p>（此方法似乎已经失效）</p>
-<p>创建项目时发现，IDEA只能选择一些新的版本的SpringBoot。我们可以遵循下述方法给SpringBoot“降级”：</p>
-<ol>
-<li><p>任意选择创建一个版本，等待项目文件构建完成.。</p>
-</li>
-<li><p>在<code>pom.xml</code>中注释掉单元测试(<code>spring-boot-starter-test</code>)部分的<code>dependency</code></p>
-<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">        <span class="comment">&lt;!-- 注释单元测试部分的dependency后修改版本 --&gt;</span></span><br><span class="line"><span class="comment">&lt;!--        &lt;dependency&gt;--&gt;</span></span><br><span class="line"><span class="comment">&lt;!--            &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;--&gt;</span></span><br><span class="line"><span class="comment">&lt;!--            &lt;artifactId&gt;spring-boot-starter-test&lt;/artifactId&gt;--&gt;</span></span><br><span class="line"><span class="comment">&lt;!--            &lt;scope&gt;test&lt;/scope&gt;--&gt;</span></span><br><span class="line"><span class="comment">&lt;!--        &lt;/dependency&gt;--&gt;</span></span><br></pre></td></tr></table></figure></li>
-<li><p>在<code>&lt;parent&gt;</code>中修改版本号，点击maven导入</p>
-</li>
-<li><p>释放单元测试部分注释</p>
-</li>
-</ol>
-<h2 id="找不到-Spring-Initailizr-选项的原因"><a href="#找不到-Spring-Initailizr-选项的原因" class="headerlink" title="找不到 Spring Initailizr 选项的原因"></a>找不到 Spring Initailizr 选项的原因</h2><p>Spring Initailizr 仅针对 IDEA Ultimate 版本提供，并不对 IDEA 社区版 提供。<br>如果你使用 IDEA 2020.3 版本或更旧的版本，可以使用 intellij-spring-assistant 插件实现这个功能。请参考 <a target="_blank" rel="noopener" href="https://github.com/eltonsandre/intellij-spring-assistant">https://github.com/eltonsandre/intellij-spring-assistant</a><br>如果使用更新版本，推荐安装 IDEA Ultimate 版本，学生或教师可以在 <a target="_blank" rel="noopener" href="https://www.jetbrains.com/zh-cn/community/education/#students">https://www.jetbrains.com/zh-cn/community/education/#students</a> 申请免费许可证。</p>
+<h1 id="RequestMapping-注解的位置"><a href="#RequestMapping-注解的位置" class="headerlink" title="@RequestMapping 注解的位置"></a>@RequestMapping 注解的位置</h1><p>@RequestMapping 注解可以使用在 <strong>类</strong> 和 <strong>方法</strong> 之上 。使用在类上则本类中所有其他@RequestMapping的映射都要先满足类上注解的要求。</p>
+<p>关于注解的使用位置，我吗可以通过源码获知，如此处的源码中（追踪注解）有如下内容：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Target(&#123;ElementType.TYPE, ElementType.METHOD&#125;)</span></span><br></pre></td></tr></table></figure>
 
+<p>则表示可使用于<strong>类</strong>（TYPE） 和 <strong>方法</strong>（METHOD）之上</p>
+<h1 id="指定请求路径与方式"><a href="#指定请求路径与方式" class="headerlink" title="指定请求路径与方式"></a>指定请求路径与方式</h1><p>可以通过指定@RequestMapping的 <strong>value属性(或path)</strong> 来指定请求路径，指定<strong>method属性</strong> 来指定请求方式。<br>value属性需要以String类型提供，method属性需要以<code>RequestMethod</code>的枚举类型提供。接受的RequestMethod枚举类型如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">enum</span> <span class="title">RequestMethod</span> </span>&#123;</span><br><span class="line">    GET,</span><br><span class="line">    HEAD,</span><br><span class="line">    POST,</span><br><span class="line">    PUT,</span><br><span class="line">    PATCH,</span><br><span class="line">    DELETE,</span><br><span class="line">    OPTIONS,</span><br><span class="line">    TRACE;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>SpringBoot提供了针对请求方法的合成注解供使用：</p>
+<ul>
+<li>@PostMapping 等价于 @RequestMapping(method = RequestMethod.POST)</li>
+<li>@GetMapping 等价于 @RequestMapping(method = RequestMethod.GET)</li>
+<li>@PutMapping 等价于 @RequestMapping(method = RequestMethod.PUT)</li>
+<li>@DeleteMapping 等价于 @RequestMapping(method = RequestMethod.DELETE)</li>
+</ul>
+<p>代码示例：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@RequestMapping(value = &quot;/testMethod&quot;, method = RequestMethod.POST)</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> String <span class="title">testMethod</span><span class="params">()</span></span>&#123;</span><br><span class="line">    System.out.println(<span class="string">&quot;testMethod 处理了请求&quot;</span>);</span><br><span class="line">    <span class="keyword">return</span> <span class="string">&quot;success testMethod 测试成功&quot;</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>Tips</strong>：</p>
+<ol>
+<li>当只指定请求路径时，不需要特别写 value 的属性名。直接写一个String类型即可。</li>
+<li>当不知到属性注定所需的参数时，可以追踪源码。点击 属性名-再点击参数类型 即可看到。</li>
+</ol>
+<h1 id="指定请求参数"><a href="#指定请求参数" class="headerlink" title="指定请求参数"></a>指定请求参数</h1><p>使用<strong>params</strong>属性指定。<br>可以指定 <strong>有</strong> 或 <strong>没有</strong> 某个参数：<code>params = &quot;参数名&quot;</code> 或 <code>params = &quot;!参数名&quot;</code>。<br>也可以指定参数 <strong>是</strong> 或 <strong>不是</strong> 某个值：<code>params = &quot;参数名=参数值&quot;</code> 或 <code>params = &quot;参数名!=参数值&quot;</code></p>
+<p>代码示例：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@RequestMapping(value = &quot;/testParams&quot;, method = RequestMethod.GET, params = &quot;code!=hello&quot;)</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> String <span class="title">testParams</span><span class="params">()</span></span>&#123;</span><br><span class="line">    System.out.println(<span class="string">&quot;testParams 处理了请求&quot;</span>);</span><br><span class="line">    <span class="keyword">return</span> <span class="string">&quot;testParams 测试成功&quot;</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="指定请求头"><a href="#指定请求头" class="headerlink" title="指定请求头"></a>指定请求头</h1><p>使用<strong>headers</strong>属性指定，设置方式与指定请求参数相似。<br>可以指定 <strong>有</strong> 或 <strong>没有</strong> 某个请求头：<code>headers = &quot;请求头名&quot;</code> 或 <code>headers = &quot;!请求头名&quot;</code>。<br>也可以指定参数 <strong>是</strong> 或 <strong>不是</strong> 某个值：<code>params = &quot;请求头名=请求头值&quot;</code> 或 <code>params = &quot;请求头名!=请求头值&quot;</code></p>
+<p>代码示例：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@RequestMapping(value = &quot;/testHeaders2&quot;, method = RequestMethod.GET, headers = &quot;deviceType=ios&quot;)</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> String <span class="title">testHeaders2</span><span class="params">()</span></span>&#123;</span><br><span class="line">    System.out.println(<span class="string">&quot;testHeaders2 处理了请求&quot;</span>);</span><br><span class="line">    <span class="keyword">return</span> <span class="string">&quot;testHeaders2 测试成功&quot;</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="指定请求头的Content-Type"><a href="#指定请求头的Content-Type" class="headerlink" title="指定请求头的Content-Type"></a>指定请求头的Content-Type</h1><p>使用<strong>consumes</strong>属性指定，设置方式与指定请求参数相似。<br>也可以指定Content-Type头 <strong>是</strong> 或 <strong>不是</strong> 某个值：<code>consumes = &quot;Content-Type头的值&quot;</code> 或 <code>consumes = &quot;!Content-Type头的值&quot;</code></p>
+<p>代码示例：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@RequestMapping(value = &quot;/testConsumes&quot;, method = RequestMethod.GET, consumes = &quot;multipart/form-data&quot;)</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> String <span class="title">testConsumes</span><span class="params">()</span></span>&#123;</span><br><span class="line">    System.out.println(<span class="string">&quot;testConsumes 处理了请求&quot;</span>);</span><br><span class="line">    <span class="keyword">return</span> <span class="string">&quot;testConsumes 测试成功&quot;</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
     </div>
 
     
@@ -306,7 +306,7 @@
 
       <footer class="post-footer">
           <div class="post-tags">
-              <a href="/tags/SpringBoot%E5%85%A5%E9%97%A8/" rel="tag"># SpringBoot入门</a>
+              <a href="/tags/web%E5%BC%80%E5%8F%91/" rel="tag"># web开发</a>
           </div>
 
         
@@ -315,13 +315,10 @@
         
     <div class="post-nav">
       <div class="post-nav-item">
-    <a href="/2021/10/05/SpringBoot%E2%80%94%E5%AE%9E%E8%B7%B5%E6%B5%81%E7%A8%8B%E4%B8%8E%E6%8A%80%E5%B7%A7/" rel="prev" title="SpringBoot—实践流程与技巧">
-      <i class="fa fa-chevron-left"></i> SpringBoot—实践流程与技巧
+    <a href="/2021/10/06/SpringBoot%E2%80%94Web%C2%B7%E5%9F%BA%E6%9C%AC%E6%B3%A8%E8%A7%A3/" rel="prev" title="SpringBoot—Web·基本注解">
+      <i class="fa fa-chevron-left"></i> SpringBoot—Web·基本注解
     </a></div>
-      <div class="post-nav-item">
-    <a href="/2021/10/05/SpringBoot%E2%80%94%E4%BD%BF%E7%94%A8YAML%E8%BF%9B%E8%A1%8C%E9%85%8D%E7%BD%AE%E7%BB%91%E5%AE%9A/" rel="next" title="SpringBoot—使用YAML进行配置绑定">
-      SpringBoot—使用YAML进行配置绑定 <i class="fa fa-chevron-right"></i>
-    </a></div>
+      <div class="post-nav-item"></div>
     </div>
       </footer>
     
@@ -381,7 +378,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Spring-Initailizr-%E5%88%9B%E5%BB%BA%E9%A1%B9%E7%9B%AE%E7%9A%84%E4%B8%80%E8%88%AC%E6%96%B9%E6%B3%95"><span class="nav-number">1.</span> <span class="nav-text">Spring Initailizr 创建项目的一般方法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%88%9B%E5%BB%BA%E4%BD%8E%E7%89%88%E6%9C%ACSpringBoot%E9%A1%B9%E7%9B%AE"><span class="nav-number">2.</span> <span class="nav-text">创建低版本SpringBoot项目</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%89%BE%E4%B8%8D%E5%88%B0-Spring-Initailizr-%E9%80%89%E9%A1%B9%E7%9A%84%E5%8E%9F%E5%9B%A0"><span class="nav-number">3.</span> <span class="nav-text">找不到 Spring Initailizr 选项的原因</span></a></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#RequestMapping-%E6%B3%A8%E8%A7%A3%E7%9A%84%E4%BD%8D%E7%BD%AE"><span class="nav-number">1.</span> <span class="nav-text">@RequestMapping 注解的位置</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%8C%87%E5%AE%9A%E8%AF%B7%E6%B1%82%E8%B7%AF%E5%BE%84%E4%B8%8E%E6%96%B9%E5%BC%8F"><span class="nav-number">2.</span> <span class="nav-text">指定请求路径与方式</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%8C%87%E5%AE%9A%E8%AF%B7%E6%B1%82%E5%8F%82%E6%95%B0"><span class="nav-number">3.</span> <span class="nav-text">指定请求参数</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%8C%87%E5%AE%9A%E8%AF%B7%E6%B1%82%E5%A4%B4"><span class="nav-number">4.</span> <span class="nav-text">指定请求头</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%8C%87%E5%AE%9A%E8%AF%B7%E6%B1%82%E5%A4%B4%E7%9A%84Content-Type"><span class="nav-number">5.</span> <span class="nav-text">指定请求头的Content-Type</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
