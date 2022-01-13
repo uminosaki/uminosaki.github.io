@@ -14,12 +14,13 @@
 
 
 <link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
   <link rel="stylesheet" href="/lib/pace/pace-theme-minimal.min.css">
   <script src="/lib/pace/pace.min.js"></script>
 
 <script id="hexo-configurations">
     var NexT = window.NexT || {};
-    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"manual","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"manual","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
   </script>
 
   <meta name="description" content="你们好呀！ 欢迎来到「海の咲的杂货铺」， 现在「海の咲的杂货铺」正在装修中。 我们会做足准备， 所以， 请期待正式开张的那一天吧！">
@@ -221,10 +222,10 @@
       <div class="post-body">
           <div class="tag-cloud">
             <div class="tag-cloud-title">
-              目前共计 13 个标签
+              目前共计 14 个标签
             </div>
             <div class="tag-cloud-tags">
-              <a href="/tags/IO%E6%B5%81/" style="font-size: 12px; color: #ccc">IO流</a> <a href="/tags/Lambda%E8%A1%A8%E8%BE%BE%E5%BC%8F/" style="font-size: 16.5px; color: #9d9d9d">Lambda表达式</a> <a href="/tags/SpringBoot%E5%85%A5%E9%97%A8/" style="font-size: 25.5px; color: #404040">SpringBoot入门</a> <a href="/tags/SpringBoot%E5%AE%B9%E5%99%A8/" style="font-size: 21px; color: #6f6f6f">SpringBoot容器</a> <a href="/tags/web%E5%BC%80%E5%8F%91/" style="font-size: 30px; color: #111">web开发</a> <a href="/tags/web%E7%BC%96%E7%A8%8B/" style="font-size: 16.5px; color: #9d9d9d">web编程</a> <a href="/tags/%E5%87%BD%E6%95%B0%E5%BC%8F%E5%BC%8F%E7%BC%96%E7%A8%8B/" style="font-size: 12px; color: #ccc">函数式式编程</a> <a href="/tags/%E5%8F%8D%E5%B0%84/" style="font-size: 12px; color: #ccc">反射</a> <a href="/tags/%E5%9B%BA%E5%AE%9A%E5%86%99%E6%B3%95/" style="font-size: 12px; color: #ccc">固定写法</a> <a href="/tags/%E5%A4%9A%E7%BA%BF%E7%A8%8B/" style="font-size: 12px; color: #ccc">多线程</a> <a href="/tags/%E6%8E%A5%E5%8F%A3/" style="font-size: 16.5px; color: #9d9d9d">接口</a> <a href="/tags/%E6%B5%81%E5%BC%8F%E7%BC%96%E7%A8%8B/" style="font-size: 12px; color: #ccc">流式编程</a> <a href="/tags/%E7%B1%BB%E5%8A%A0%E8%BD%BD%E5%99%A8/" style="font-size: 12px; color: #ccc">类加载器</a>
+              <a href="/tags/IO%E6%B5%81/" style="font-size: 12px; color: #ccc">IO流</a> <a href="/tags/Lambda%E8%A1%A8%E8%BE%BE%E5%BC%8F/" style="font-size: 16.5px; color: #9d9d9d">Lambda表达式</a> <a href="/tags/SpringBoot%E5%85%A5%E9%97%A8/" style="font-size: 25.5px; color: #404040">SpringBoot入门</a> <a href="/tags/SpringBoot%E5%AE%B9%E5%99%A8/" style="font-size: 21px; color: #6f6f6f">SpringBoot容器</a> <a href="/tags/web%E5%BC%80%E5%8F%91/" style="font-size: 30px; color: #111">web开发</a> <a href="/tags/web%E7%BC%96%E7%A8%8B/" style="font-size: 16.5px; color: #9d9d9d">web编程</a> <a href="/tags/%E5%87%BD%E6%95%B0%E5%BC%8F%E5%BC%8F%E7%BC%96%E7%A8%8B/" style="font-size: 12px; color: #ccc">函数式式编程</a> <a href="/tags/%E5%8F%8D%E5%B0%84/" style="font-size: 12px; color: #ccc">反射</a> <a href="/tags/%E5%9B%BA%E5%AE%9A%E5%86%99%E6%B3%95/" style="font-size: 12px; color: #ccc">固定写法</a> <a href="/tags/%E5%A4%9A%E7%BA%BF%E7%A8%8B/" style="font-size: 12px; color: #ccc">多线程</a> <a href="/tags/%E6%8E%A5%E5%8F%A3/" style="font-size: 16.5px; color: #9d9d9d">接口</a> <a href="/tags/%E6%B5%81%E5%BC%8F%E7%BC%96%E7%A8%8B/" style="font-size: 12px; color: #ccc">流式编程</a> <a href="/tags/%E7%9B%98%E8%AF%8D%E6%B4%9E/" style="font-size: 12px; color: #ccc">盘词洞</a> <a href="/tags/%E7%B1%BB%E5%8A%A0%E8%BD%BD%E5%99%A8/" style="font-size: 12px; color: #ccc">类加载器</a>
             </div>
           </div>
         
@@ -310,13 +311,13 @@
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-count">3</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">13</span>
+        <span class="site-state-item-count">14</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -375,6 +376,8 @@
 
   
   <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
   <script src="/lib/velocity/velocity.min.js"></script>
   <script src="/lib/velocity/velocity.ui.min.js"></script>
 
